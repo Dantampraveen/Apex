@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        .converter-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 350px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            font-size: 18px;
+        }
+        
+        .swap-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #7f8c8d;
+            margin: 10px 0;
+        }
+        
+        .conversion-result {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="converter-container">
+        <h1>Currency Converter</h1>
+        
+        <div class="input-group">
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" placeholder="Enter amount" min="0" step="0.01" value="1">
+        </div>
+        
+        <div class="input-group">
+            <label for="from-currency">From Currency</label>
+            <select id="from-currency">
+                <option value="USD">US Dollar (USD)</option>
+                <option value="EUR">Euro (EUR)</option>
+                <option value="GBP">British Pound (GBP)</option>
+                <option value="JPY">Japanese Yen (JPY)</option>
+                <option value="CAD">Canadian Dollar (CAD)</option>
+                <option value="AUD">Australian Dollar (AUD)</option>
+                <option value="CNY">Chinese Yuan (CNY)</option>
+                <option value="INR">Indian Rupee (INR)</option>
+            </select>
+        </div>
+        
+        <button class="swap-btn" id="swap-btn">⇅ Swap Currencies</button>
+        
+        <div class="input-group">
+            <label for="to-currency">To Currency</label>
+            <select id="to-currency">
+                <option value="EUR">Euro (EUR)</option>
+                <option value="USD">US Dollar (USD)</option>
+                <option value="GBP">British Pound (GBP)</option>
+                <option value="JPY">Japanese Yen (JPY)</option>
+                <option value="CAD">Canadian Dollar (CAD)</option>
+                <option value="AUD">Australian Dollar (AUD)</option>
+                <option value="CNY">Chinese Yuan (CNY)</option>
+                <option value="INR">Indian Rupee (INR)</option>
+            </select>
+        </div>
+        
+        <button id="convert-btn">Convert</button>
+        
+        <div class="result">
+            <div>Conversion Result:</div>
+            <div class="conversion-result" id="conversion-result">1.00 USD = 0.93 EUR</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const amountInput = document.getElementById('amount');
+            const fromCurrencySelect = document.getElementById('from-currency');
+            const toCurrencySelect = document.getElementById('to-currency');
+            const convertBtn = document.getElementById('convert-btn');
+            const swapBtn = document.getElementById('swap-btn');
+            const conversionResult = document.getElementById('conversion-result');
+            
+            // Exchange rates (simplified - in a real app you would fetch these from an API)
+            const exchangeRates = {
+                USD: { EUR: 0.93, GBP: 0.79, JPY: 151.42, CAD: 1.36, AUD: 1.51, CNY: 7.23, INR: 83.29 },
+                EUR: { USD: 1.07, GBP: 0.85, JPY: 162.33, CAD: 1.46, AUD: 1.62, CNY: 7.75, INR: 89.30 },
+                GBP: { USD: 1.26, EUR: 1.17, JPY: 190.60, CAD: 1.71, AUD: 1.90, CNY: 9.09, INR: 104.75 },
+                JPY: { USD: 0.0066, EUR: 0.0062, GBP: 0.0052, CAD: 0.0090, AUD: 0.010, CNY: 0.048, INR: 0.55 },
+                CAD: { USD: 0.73, EUR: 0.68, GBP: 0.58, JPY: 111.11, AUD: 1.11, CNY: 5.31, INR: 61.20 },
+                AUD: { USD: 0.66, EUR: 0.62, GBP: 0.53, JPY: 100.00, CAD: 0.90, CNY: 4.79, INR: 55.20 },
+                CNY: { USD: 0.14, EUR: 0.13, GBP: 0.11, JPY: 20.83, CAD: 0.19, AUD: 0.21, INR: 11.52 },
+                INR: { USD: 0.012, EUR: 0.011, GBP: 0.0095, JPY: 1.81, CAD: 0.016, AUD: 0.018, CNY: 0.087 }
+            };
+            
+            // Update conversion result display
+            function updateConversionResult() {
+                const amount = parseFloat(amountInput.value) || 0;
+                const fromCurrency = fromCurrencySelect.value;
+                const toCurrency = toCurrencySelect.value;
+                
+                if (fromCurrency === toCurrency) {
+                    conversionResult.textContent = `${amount.toFixed(2)} ${fromCurrency} = ${amount.toFixed(2)} ${toCurrency}`;
+                    return;
+                }
+                
+                const rate = exchangeRates[fromCurrency][toCurrency];
+                const convertedAmount = amount * rate;
+                
+                conversionResult.textContent = `${amount.toFixed(2)} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`;
+            }
+            
+            // Swap currencies
+            function swapCurrencies() {
+                const temp = fromCurrencySelect.value;
+                fromCurrencySelect.value = toCurrencySelect.value;
+                toCurrencySelect.value = temp;
+                updateConversionResult();
+            }
+            
+            // Event listeners
+            convertBtn.addEventListener('click', updateConversionResult);
+            swapBtn.addEventListener('click', swapCurrencies);
+            
+            // Also convert when inputs change
+            amountInput.addEventListener('input', updateConversionResult);
+            fromCurrencySelect.addEventListener('change', updateConversionResult);
+            toCurrencySelect.addEventListener('change', updateConversionResult);
+            
+            // Initial conversion
+            updateConversionResult();
+        });
+    </script>
+</body>
+</html>
